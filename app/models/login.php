@@ -1,7 +1,5 @@
 <?php
 session_start();
-use app\views\pantallaInicio;
-
 
 $usuario = $_POST['usuario'];
 $password = $_POST['password'];
