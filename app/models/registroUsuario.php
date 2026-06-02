@@ -1,14 +1,22 @@
 <?php
 session_start();
+require_once '../config/database.php';
 
 // Obtener datos del formulario
-$usuario = isset($_POST['usuario']) ? $_POST['usuario'] : '';
-$email = isset($_POST['email']) ? $_POST['email'] : '';
+$nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
+$usuario = isset($_POST['usuario']) ? trim($_POST['usuario']) : '';
+$email = isset($_POST['email']) ? trim($_POST['email']) : '';
 $password = isset($_POST['password']) ? $_POST['password'] : '';
 $password_confirm = isset($_POST['password_confirm']) ? $_POST['password_confirm'] : '';
 
 // Validaciones básicas
-if (empty($usuario) || empty($email) || empty($password) || empty($password_confirm)) {
+if (
+    empty($nombre) ||
+    empty($usuario) ||
+    empty($email) ||
+    empty($password) ||
+    empty($password_confirm)
+) {
     header("Location: ../views/inicioSesion/register.php?error=Todos los campos son requeridos");
     exit;
 }
@@ -23,53 +31,53 @@ if (strlen($password) < 4) {
     exit;
 }
 
-// Archivo de almacenamiento de usuarios
-$archivoUsuarios = __DIR__ . '/usuarios.json';
+// Verificar usuario o email existente
+$sql = "
+SELECT id
+FROM usuarios
+WHERE usuario = :usuario
+OR email = :email
+";
 
-// Leer usuarios existentes
-$usuarios = [];
-if (file_exists($archivoUsuarios)) {
-    $contenido = file_get_contents($archivoUsuarios);
-    $usuarios = json_decode($contenido, true) ?? [];
-}
+$stmt = $pdo->prepare($sql);
 
-// Verificar si el usuario ya existe
-foreach ($usuarios as $user) {
-    if ($user['usuario'] === $usuario) {
-        header("Location: ../views/inicioSesion/register.php?error=El usuario ya existe");
-        exit;
-    }
-    if ($user['email'] === $email) {
-        header("Location: ../views/inicioSesion/register.php?error=El email ya está registrado");
-        exit;
-    }
-}
+$stmt->execute([
+    ':usuario' => $usuario,
+    ':email' => $email
+]);
 
-// Crear nuevo usuario
-$nuevoUsuario = [
-    'id' => count($usuarios) + 1,
-    'usuario' => $usuario,
-    'email' => $email,
-    'password' => password_hash($password, PASSWORD_DEFAULT),
-    'fecha_registro' => date('Y-m-d H:i:s')
-];
-
-// Agregar al array
-$usuarios[] = $nuevoUsuario;
-
-// Guardar en archivo JSON
-if (file_put_contents($archivoUsuarios, json_encode($usuarios, JSON_PRETTY_PRINT))) {
-    // Iniciar sesión automáticamente
-    $_SESSION['id_usuario'] = $nuevoUsuario['id'];
-    $_SESSION['usuario'] = $nuevoUsuario['usuario'];
-    $_SESSION['email'] = $nuevoUsuario['email'];
-    $_SESSION['token'] = bin2hex(random_bytes(32));
-    
-    // Redirigir a la pantalla de inicio
-    header("Location: ../views/pantallaInicio.php");
-    exit;
-} else {
-    header("Location: ../views/inicioSesion/register.php?error=Error al registrar el usuario");
+if ($stmt->fetch()) {
+    header("Location: ../views/inicioSesion/register.php?error=El usuario o email ya existe");
     exit;
 }
+
+// Insertar usuario
+$passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+$sql = "
+INSERT INTO usuarios
+(nombre,email,usuario,password)
+VALUES
+(:nombre,:email,:usuario,:password)
+";
+
+$stmt = $pdo->prepare($sql);
+
+$stmt->execute([
+    ':nombre' => $nombre,
+    ':email' => $email,
+    ':usuario' => $usuario,
+    ':password' => $passwordHash
+]);
+
+$idUsuario = $pdo->lastInsertId();
+
+// Iniciar sesión automáticamente
+$_SESSION['id_usuario'] = $idUsuario;
+$_SESSION['usuario'] = $usuario;
+$_SESSION['email'] = $email;
+$_SESSION['token'] = bin2hex(random_bytes(32));
+
+header("Location: ../views/pantallaInicio.php");
+exit;
 ?>

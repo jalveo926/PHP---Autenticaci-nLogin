@@ -1,7 +1,8 @@
 <?php
 session_start();
+require_once '../config/database.php';
 
-$usuario = isset($_POST['usuario']) ? $_POST['usuario'] : '';
+$usuario = isset($_POST['usuario']) ? trim($_POST['usuario']) : '';
 $password = isset($_POST['password']) ? $_POST['password'] : '';
 
 if (empty($usuario) || empty($password)) {
@@ -9,27 +10,25 @@ if (empty($usuario) || empty($password)) {
     exit;
 }
 
-// Archivo de almacenamiento de usuarios
-$archivoUsuarios = __DIR__ . '/usuarios.json';
+// Buscar usuario en la base de datos
+$sql = "
+SELECT *
+FROM usuarios
+WHERE usuario = :usuario
+";
 
-// Leer usuarios del archivo
-$usuarios = [];
-if (file_exists($archivoUsuarios)) {
-    $contenido = file_get_contents($archivoUsuarios);
-    $usuarios = json_decode($contenido, true) ?? [];
-}
+$stmt = $pdo->prepare($sql);
 
-// Buscar el usuario
-$usuarioEncontrado = null;
-foreach ($usuarios as $user) {
-    if ($user['usuario'] === $usuario) {
-        $usuarioEncontrado = $user;
-        break;
-    }
-}
+$stmt->execute([
+    ':usuario' => $usuario
+]);
 
-if ($usuarioEncontrado && password_verify($password, $usuarioEncontrado['password'])) {
-    // Token aleatorio
+$usuarioEncontrado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (
+    $usuarioEncontrado &&
+    password_verify($password, $usuarioEncontrado['password'])
+) {
     $token = bin2hex(random_bytes(32));
 
     $_SESSION['id_usuario'] = $usuarioEncontrado['id'];
@@ -37,7 +36,6 @@ if ($usuarioEncontrado && password_verify($password, $usuarioEncontrado['passwor
     $_SESSION['email'] = $usuarioEncontrado['email'];
     $_SESSION['token'] = $token;
 
-    // Redirige a la pantalla de inicio
     header("Location: ../views/pantallaInicio.php");
     exit;
 }

@@ -12,6 +12,9 @@ session_start();
 <h2>Crear Nueva Cuenta</h2>
 
 <form action="../../models/registroUsuario.php" method="POST">
+    <label>Nombre:</label>
+    <input type="text" name="nombre" required>
+    <br><br>
     <label>Usuario:</label>
     <input type="text" name="usuario" required>
     <br><br>
