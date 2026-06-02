@@ -31,5 +31,11 @@ if (isset($_SESSION['id_usuario'])) {
     <button type="submit">Ingresar</button>
 </form>
 
-</body>
+<p>¿No tienes cuenta? <a href="app/views/inicioSesion/register.php">Regístrate aquí</a></p>
+
+<?php
+if (isset($_GET['error'])) {
+    echo "<p style='color:red;'>" . htmlspecialchars($_GET['error']) . "</p>";
+}
+?>
 </html>
