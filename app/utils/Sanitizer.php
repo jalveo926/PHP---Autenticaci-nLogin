@@ -41,12 +41,12 @@ class Sanitizer
     }
 
     /**
-     * Valida que una contraseña cumpla los requisitos mínimos
-     * @param string $password - La contraseña a validar
-     * @param int $minLength - Longitud mínima (default: 4)
+    * Valida que una contraseña cumpla los requisitos mínimos
+    * @param string $password - La contraseña a validar
+    * @param int $minLength - Longitud mínima (default: 8)
      * @return array - ['valido' => bool, 'errores' => array]
      */
-    public static function validarPassword($password, $minLength = 4)
+    public static function validarPassword($password, $minLength = 8)
     {
         $errores = [];
 

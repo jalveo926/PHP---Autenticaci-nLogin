@@ -28,7 +28,7 @@ class RegistroUsuario
 
     public function validarPassword($password)
     {
-        return Sanitizer::validarPassword($password, 4);
+        return Sanitizer::validarPassword($password, 8);
     }
 
     public function validarCoincidenciaPassword($password, $password_confirm)
