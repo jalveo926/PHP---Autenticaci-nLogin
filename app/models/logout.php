@@ -1,18 +1,4 @@
 <?php
-session_start();
-
-// Eliminar todas las variables de sesión
-session_unset();
-
-// Destruir la sesión
-session_destroy();
-
-// Redirigir a la página de inicio
-header("Location: ../../index.php?success=Sesión cerrada correctamente");
-exit;
-?>
-// logout.php - Maneja la lógica de cerrar sesión
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -39,3 +25,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
     exit;
 }
 ?>
+

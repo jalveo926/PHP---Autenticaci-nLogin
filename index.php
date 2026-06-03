@@ -23,31 +23,33 @@ if (isset($_SESSION['id_usuario'])) {
 <html>
 <head>
     <title>Login</title>
+    <link rel="stylesheet" href="app/styles/login.css">
 </head>
 <body>
+    <div class="container">
+        <h2>Iniciar Sesión</h2>
 
-<h2>Iniciar Sesión</h2>
+        <?php if (isset($_GET['error'])): ?>
+            <div class="error"><?php echo htmlspecialchars($_GET['error']); ?></div>
+        <?php endif; ?>
 
-<form action="app/models/login.php" method="POST">
-    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-    <label>Usuario:</label>
-    <input type="text" name="usuario" required>
+        <form action="app/models/login.php" method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
 
-    <br><br>
+            <div class="form-group">
+                <label>Usuario:</label>
+                <input type="text" name="usuario" required>
+            </div>
 
-    <label>Contraseña:</label>
-    <input type="password" name="password" required>
+            <div class="form-group">
+                <label>Contraseña:</label>
+                <input type="password" name="password" required>
+            </div>
 
-    <br><br>
+            <button type="submit">Ingresar</button>
+        </form>
 
-    <button type="submit">Ingresar</button>
-</form>
-
-<p>¿No tienes cuenta? <a href="app/views/inicioSesion/register.php">Regístrate aquí</a></p>
-
-<?php
-if (isset($_GET['error'])) {
-    echo "<p style='color:red;'>" . htmlspecialchars($_GET['error']) . "</p>";
-}
-?>
+        <p class="redirect">¿No tienes cuenta? <a href="app/views/inicioSesion/register.php">Regístrate aquí</a></p>
+    </div>
+</body>
 </html>

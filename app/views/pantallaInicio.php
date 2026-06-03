@@ -151,7 +151,8 @@ if (isset($_SESSION['2fa_pendiente']) && $_SESSION['2fa_pendiente']) {
                 Has completado exitosamente la autenticación en dos factores y accedido a tu cuenta.
             </p>
 
-            <form method="GET" action="../models/logout.php">
+            <form method="POST" action="../models/logout.php">
+                <input type="hidden" name="logout" value="1">
                 <button type="submit" class="logout-btn">Cerrar Sesión</button>
             </form>
         </div>

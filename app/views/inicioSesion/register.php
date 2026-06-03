@@ -6,41 +6,46 @@ session_start();
 <html>
 <head>
     <title>Registro de Usuario</title>
+    <link rel="stylesheet" href="../../styles/register.css">
 </head>
 <body>
+    <div class="container">
+        <h2>Crear Nueva Cuenta</h2>
 
-<h2>Crear Nueva Cuenta</h2>
+        <?php if (isset($_GET['error'])): ?>
+            <div class="error"><?php echo htmlspecialchars($_GET['error']); ?></div>
+        <?php endif; ?>
 
-<form action="../../models/registroUsuario.php" method="POST">
-    <label>Nombre:</label>
-    <input type="text" name="nombre" required>
-    <br><br>
-    <label>Usuario:</label>
-    <input type="text" name="usuario" required>
-    <br><br>
+        <form action="../../models/registroUsuario.php" method="POST">
+            <div class="form-group">
+                <label>Nombre:</label>
+                <input type="text" name="nombre" required>
+            </div>
 
-    <label>Email:</label>
-    <input type="email" name="email" required>
-    <br><br>
+            <div class="form-group">
+                <label>Usuario:</label>
+                <input type="text" name="usuario" required>
+            </div>
 
-    <label>Contraseña:</label>
-    <input type="password" name="password" required>
-    <br><br>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" name="email" required>
+            </div>
 
-    <label>Confirmar Contraseña:</label>
-    <input type="password" name="password_confirm" required>
-    <br><br>
+            <div class="form-group">
+                <label>Contraseña:</label>
+                <input type="password" name="password" required>
+            </div>
 
-    <button type="submit">Registrarse</button>
-</form>
+            <div class="form-group">
+                <label>Confirmar Contraseña:</label>
+                <input type="password" name="password_confirm" required>
+            </div>
 
-<p>¿Ya tienes cuenta? <a href="../../../index.php">Inicia sesión aquí</a></p>
+            <button type="submit">Registrarse</button>
+        </form>
 
-<?php
-if (isset($_GET['error'])) {
-    echo "<p style='color:red;'>" . htmlspecialchars($_GET['error']) . "</p>";
-}
-?>
-
+        <p class="redirect">¿Ya tienes cuenta? <a href="../../../index.php">Inicia sesión aquí</a></p>
+    </div>
 </body>
 </html>
