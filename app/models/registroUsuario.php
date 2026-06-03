@@ -1,6 +1,9 @@
 <?php
 session_start();
-require_once '../config/database.php';
+require_once '../config/databaseConfig.php';
+require_once 'Database.php';
+
+$db = new Database($pdo);
 
 // Obtener datos del formulario
 $nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
@@ -32,21 +35,7 @@ if (strlen($password) < 4) {
 }
 
 // Verificar usuario o email existente
-$sql = "
-SELECT id
-FROM usuarios
-WHERE usuario = :usuario
-OR email = :email
-";
-
-$stmt = $pdo->prepare($sql);
-
-$stmt->execute([
-    ':usuario' => $usuario,
-    ':email' => $email
-]);
-
-if ($stmt->fetch()) {
+if ($db->existe('usuarios', [':usuario' => $usuario, ':email' => $email])) {
     header("Location: ../views/inicioSesion/register.php?error=El usuario o email ya existe");
     exit;
 }
@@ -54,23 +43,14 @@ if ($stmt->fetch()) {
 // Insertar usuario
 $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-$sql = "
-INSERT INTO usuarios
-(nombre,email,usuario,password)
-VALUES
-(:nombre,:email,:usuario,:password)
-";
-
-$stmt = $pdo->prepare($sql);
-
-$stmt->execute([
+$datosUsuario = [
     ':nombre' => $nombre,
     ':email' => $email,
     ':usuario' => $usuario,
     ':password' => $passwordHash
-]);
+];
 
-$idUsuario = $pdo->lastInsertId();
+$idUsuario = $db->insertar('usuarios', $datosUsuario);
 
 // Iniciar sesión automáticamente
 $_SESSION['id_usuario'] = $idUsuario;

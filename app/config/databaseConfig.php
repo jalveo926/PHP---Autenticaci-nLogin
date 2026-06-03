@@ -2,8 +2,8 @@
 
 $host = "localhost";
 $dbname = "autenticacion_db";
-$username = "root";
-$password = "";
+$username = "auth_usuario";
+$password = "1234";
 
 try {
 
