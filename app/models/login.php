@@ -1,5 +1,17 @@
 <?php
 session_start();
+
+if (
+    !isset($_POST['csrf_token']) ||
+    !isset($_SESSION['csrf_token']) ||
+    !hash_equals(
+        $_SESSION['csrf_token'],
+        $_POST['csrf_token']
+    )
+) {
+    die("Token CSRF inválido");
+}
+
 require_once '../config/databaseConfig.php';
 require_once 'Database.php';
 require_once 'Autenticador2FA.php';
@@ -37,6 +49,7 @@ if (
     $_SESSION['usuario'] = $usuarioEncontrado['usuario'];
     $_SESSION['email'] = $usuarioEncontrado['email'];
     $_SESSION['token'] = $token;
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     $_SESSION['2fa_pendiente'] = true;
 
     // Inicializar autenticador 2FA

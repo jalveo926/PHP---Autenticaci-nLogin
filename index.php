@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Verifica si el usuario ya ha iniciado sesión
 if (isset($_SESSION['id_usuario'])) {
     // Si 2FA está pendiente, no permitir acceso a pantallaInicio
@@ -25,6 +29,7 @@ if (isset($_SESSION['id_usuario'])) {
 <h2>Iniciar Sesión</h2>
 
 <form action="app/models/login.php" method="POST">
+    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
     <label>Usuario:</label>
     <input type="text" name="usuario" required>
 
