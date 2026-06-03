@@ -2,35 +2,49 @@
 session_start();
 require_once '../config/databaseConfig.php';
 require_once 'Database.php';
+require_once '../utils/PasswordHasher.php';
+require_once '../utils/Sanitizer.php';
 
 $db = new Database($pdo);
+$passwordHasher = new PasswordHasher();
 
 // Obtener datos del formulario
-$nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
-$usuario = isset($_POST['usuario']) ? trim($_POST['usuario']) : '';
-$email = isset($_POST['email']) ? trim($_POST['email']) : '';
+$nombre = Sanitizer::obtenerPost('nombre', 'texto');
+$usuario = Sanitizer::obtenerPost('usuario', 'texto');
+$email = Sanitizer::obtenerPost('email', 'email');
 $password = isset($_POST['password']) ? $_POST['password'] : '';
 $password_confirm = isset($_POST['password_confirm']) ? $_POST['password_confirm'] : '';
 
-// Validaciones básicas
-if (
-    empty($nombre) ||
-    empty($usuario) ||
-    empty($email) ||
-    empty($password) ||
-    empty($password_confirm)
-) {
-    header("Location: ../views/inicioSesion/register.php?error=Todos los campos son requeridos");
+// Validar nombre
+$validarNombre = Sanitizer::validarNombre($nombre);
+if (!$validarNombre['valido']) {
+    header("Location: ../views/inicioSesion/register.php?error=" . urlencode(implode(', ', $validarNombre['errores'])));
     exit;
 }
 
-if ($password !== $password_confirm) {
+// Validar usuario
+$validarUsuario = Sanitizer::validarUsuario($usuario);
+if (!$validarUsuario['valido']) {
+    header("Location: ../views/inicioSesion/register.php?error=" . urlencode(implode(', ', $validarUsuario['errores'])));
+    exit;
+}
+
+// Validar email
+if (!Sanitizer::validarEmail($email)) {
+    header("Location: ../views/inicioSesion/register.php?error=El email no es válido");
+    exit;
+}
+
+// Validar password
+$validarPassword = Sanitizer::validarPassword($password, 4);
+if (!$validarPassword['valido']) {
+    header("Location: ../views/inicioSesion/register.php?error=" . urlencode(implode(', ', $validarPassword['errores'])));
+    exit;
+}
+
+// Validar que las contraseñas coincidan
+if (!Sanitizer::validarPasswordCoinciden($password, $password_confirm)) {
     header("Location: ../views/inicioSesion/register.php?error=Las contraseñas no coinciden");
-    exit;
-}
-
-if (strlen($password) < 4) {
-    header("Location: ../views/inicioSesion/register.php?error=La contraseña debe tener al menos 4 caracteres");
     exit;
 }
 
@@ -40,9 +54,15 @@ if ($db->existe('usuarios', [':usuario' => $usuario, ':email' => $email])) {
     exit;
 }
 
-// Insertar usuario
-$passwordHash = password_hash($password, PASSWORD_DEFAULT);
+// Generar hash de la contraseña
+try {
+    $passwordHash = $passwordHasher->hash($password);
+} catch (Exception $e) {
+    header("Location: ../views/inicioSesion/register.php?error=Error al procesar la contraseña");
+    exit;
+}
 
+// Insertar usuario
 $datosUsuario = [
     ':nombre' => $nombre,
     ':email' => $email,

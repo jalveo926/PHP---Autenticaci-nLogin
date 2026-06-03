@@ -3,23 +3,31 @@ session_start();
 require_once '../config/databaseConfig.php';
 require_once 'Database.php';
 require_once 'Autenticador2FA.php';
+require_once '../utils/PasswordHasher.php';
+require_once '../utils/Sanitizer.php';
 
-$usuario = isset($_POST['usuario']) ? trim($_POST['usuario']) : '';
+$usuario = Sanitizer::obtenerPost('usuario', 'texto');
 $password = isset($_POST['password']) ? $_POST['password'] : '';
 
-if (empty($usuario) || empty($password)) {
+// Validar campos requeridos
+$validarUsuario = Sanitizer::validarRequerido($usuario, 'Usuario');
+$validarPassword = Sanitizer::validarRequerido($password, 'Contraseña');
+
+if (!$validarUsuario['valido'] || !$validarPassword['valido']) {
     header("Location: ../../index.php?error=Usuario y contraseña requeridos");
     exit;
 }
 
 $db = new Database($pdo);
+$passwordHasher = new PasswordHasher();
 
 // Buscar usuario en la base de datos
 $usuarioEncontrado = $db->obtener('usuarios', [':usuario' => $usuario]);
 
+// Verificar usuario y contraseña
 if (
     $usuarioEncontrado &&
-    password_verify($password, $usuarioEncontrado['password'])
+    $passwordHasher->verify($password, $usuarioEncontrado['password'])
 ) {
     $idUsuario = $usuarioEncontrado['id'];
     $token = bin2hex(random_bytes(32));

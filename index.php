@@ -1,10 +1,17 @@
 <?php
 session_start();
 
-//Verifica si el usuario ya ha iniciado sesión
+// Verifica si el usuario ya ha iniciado sesión
 if (isset($_SESSION['id_usuario'])) {
-    header("Location: app/views/pantallaInicio.php");
-    exit;
+    // Si 2FA está pendiente, no permitir acceso a pantallaInicio
+    if (isset($_SESSION['2fa_pendiente']) && $_SESSION['2fa_pendiente']) {
+        // Permitir que vea la página de login para redirigirse a 2FA
+        // pero si trata de acceder directamente a pantallaInicio será bloqueado
+    } else {
+        // Usuario completó 2FA, redirigir a pantalla de inicio
+        header("Location: app/views/pantallaInicio.php");
+        exit;
+    }
 }
 ?>
 

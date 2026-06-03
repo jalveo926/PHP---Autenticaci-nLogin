@@ -34,7 +34,7 @@ session_start();
     <button type="submit">Registrarse</button>
 </form>
 
-<p>¿Ya tienes cuenta? <a href="../../index.php">Inicia sesión aquí</a></p>
+<p>¿Ya tienes cuenta? <a href="../../../index.php">Inicia sesión aquí</a></p>
 
 <?php
 if (isset($_GET['error'])) {
